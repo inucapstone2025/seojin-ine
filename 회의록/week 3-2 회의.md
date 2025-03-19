@@ -329,8 +329,8 @@
 - 신발 제조업체 및 판매업체: 맞춤형 신발 제작 및 판매를 위한 기술 활용 가능.
 - 의료 및 재활 분야: 발 질환 및 통증을 겪고 있는 환자들을 위한 맞춤형 신발 제작.
 
----
 
 ## 😉 성적 평가표
 
-![KakaoTalk_Photo_2025-03-19-12-49-26.png](attachment:1f496f3d-8f99-4a41-8aff-aef1c951686f:KakaoTalk_Photo_2025-03-19-12-49-26.png)
+<img width="1521" alt="KakaoTalk_Photo_2025-03-19-12-49-26" src="https://github.com/user-attachments/assets/785c48f4-f5ff-4a7a-a031-c9ec8c2ff56b" />
+
