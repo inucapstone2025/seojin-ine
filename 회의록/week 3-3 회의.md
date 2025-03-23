@@ -12,7 +12,7 @@
 
 ---
 ## 캡스톤 평가표 1차 작성
-![image.png](attachment:192043b4-320c-433a-80fc-5777483decde:image.png)
+![Image](https://github.com/user-attachments/assets/714a416a-1b1f-46b3-b746-26a9c3a96dfa)
 
 ---
 ## <이서진>
