@@ -23,7 +23,7 @@
 
 - 발을 고정할 수 있는 플랫폼 크기 및 형태 논의
 
-![image (31).png](attachment:d22513f7-9006-49c7-92d0-c52113f55091:image_(31).png)
+![Image](https://github.com/user-attachments/assets/c39d4acc-2ed8-4c9a-99e7-8f2abbe8677a)
 
 **COLMAP을 활용한 3D Point Cloud 정합 실험 공유**
 
