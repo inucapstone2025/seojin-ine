@@ -28,13 +28,7 @@
 **COLMAP을 활용한 3D Point Cloud 정합 실험 공유**
 
 - 다각도에서 촬영한 발 사진을 이용해 COLMAP으로 3D 모델 생성 실험 진행
-    
-    ![image.png](attachment:bc84503e-4fa0-4356-954f-b2e73e7b3325:image.png)
-    
-
-![image.png](attachment:c6c73f75-8fee-455a-adcf-5f57087fceab:image.png)
-
-![image.png](attachment:61ae3f57-5a7f-4db0-a00d-9ea65c3149c2:image.png)
+![Image](https://github.com/user-attachments/assets/bf19a674-db86-426a-b838-46cbe627b927)
 
 **하드웨어 구성 논의**
 
