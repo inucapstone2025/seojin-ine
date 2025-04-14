@@ -49,8 +49,7 @@
 | 10 | 15502416 | [공식 정품] 라즈베리파이 27W USB-C 아답터 검은색 (Raspberry Pi 27W USB-C Power Supply Black) | Raspberry Pi | http://www.devicemart.co.kr/goods/view?no=15502416 | 1 | 16,400 | 16,400 |
 | 11 | 1310704 | 아두이노 버튼 스위치 모듈 (흰색) [ELB060677] | YwRobot | http://www.devicemart.co.kr/goods/view?no=1310704 | 3 | 1,500 | 4,500 |
 
-
-- 시스템 flow chart
+**시스템 flow chart**
 
   ![Image](https://github.com/user-attachments/assets/eb946e9d-b546-4f6e-aef1-ecfbed510ff6)
 
