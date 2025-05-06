@@ -22,7 +22,7 @@
 
 ### 0. 측정 방법
 
-![촬영 방법.PNG](attachment:18e5f824-0dcf-48fe-b86b-70b2c2f1f37c:촬영_방법.png)
+![Image](https://github.com/user-attachments/assets/a9ccbb6e-c8c8-4d2b-b931-281d0ab6f69e)
 
 아직 하드웨어를 제작하지 않아서 임시로 
 
@@ -40,25 +40,15 @@
 
 ### 0. 배경 제거 없이 정합한 결과
 
-![image (41).png](attachment:daeb59c8-e75d-4064-8185-dfa5c3aeb376:image_(41).png)
-
-![image (42).png](attachment:4b0be8b2-4ec1-4222-a720-288bc7de7c5d:image_(42).png)
+![Image](https://github.com/user-attachments/assets/9cdfba64-60b2-4f1d-9b95-b9daabc81558)
 
 ### 1. 3D point cloud로 변환된 결과에서 필요없는 배경을 제거하는 코드
 
-![image.png](attachment:bbb8c776-8515-4cb6-98ec-85fe31b8314d:image.png)
-
-![image.png](attachment:b917ced6-81df-4093-800e-91c5b2d6e7ea:image.png)
-
-![image.png](attachment:04c006e2-d300-4d8d-bdbe-6230189c27dc:image.png)
-
-![image.png](attachment:c5d91f26-9d05-4da9-b3f6-b9cbd5ffd565:image.png)
+![Image](https://github.com/user-attachments/assets/0666f111-d0ee-4ddc-a54d-4b773a71b40c)
 
 ### 2. 배경 제거한 결과를 정합하는 코드 (다각도에서 측정한 결과를 글로벌 좌표계로 변환)
 
-![image.png](attachment:cbb130fc-008b-4de7-ba8f-e682b6ab5fda:image.png)
-
-![image.png](attachment:70d0c0d5-564b-4a40-bd16-a25237f7c636:image.png)
+![Image](https://github.com/user-attachments/assets/9807940b-3e2e-4ae1-9ce2-3d802616a51e)
 
 - 정합 코드
 
@@ -85,7 +75,7 @@
 
 ## 📌 하드웨어 구조
 
-![image.png](attachment:70a3e257-9cd6-4c83-80e5-fe4886347c85:image.png)
+![Image](https://github.com/user-attachments/assets/db8c110f-3553-4f00-ab36-67011996aa09)
 
 “올고르 알루미늄 회전판, 1개, 외경 400mm x 두께 8.5mm” 구매
 
