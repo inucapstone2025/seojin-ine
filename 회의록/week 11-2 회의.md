@@ -15,13 +15,12 @@
 회전 구조물 정밀도 향상, sd카드에 라즈베리파이 os 설치, (esp32)모터&버튼 제어 실험
 
 ---
-
 ### 📌 회전 구조물 정밀도 향상
 
 1. 회전 구조물의 높이 조절 - 볼트와 너트 사용
 2. 아크릴 재단하기 위한 도안 제작
     
-    ![image.png](attachment:2d608cdd-5f2f-4e69-acd0-667773c9e411:image.png)
+    <img width="972" alt="Image" src="https://github.com/user-attachments/assets/9a0635e5-114d-47a6-961d-988043ea9380" />
     
 
 ### 📌 sd카드에 라즈베리파이 os 설치
@@ -34,7 +33,7 @@
 
 버튼을 누르면 모터가 움직이도록 코드 작성
 
-![image.png](attachment:cdcaf8e3-18b2-4210-9227-836b6be51487:image.png)
+![Image](https://github.com/user-attachments/assets/5cbcf75c-a9ed-4cfd-beff-59d3742f3a0b)
 
 ```arduino
 // TB6612FNG right side & ESP32-WROOM-32D DEVKIT_C V4 left side pin order
