@@ -1,4 +1,4 @@
-# 3D Foot Scanner 프로젝트
+# 2025-casption1-3D-foot-code 프로젝트
 
 ## 프로젝트 개요
 이 프로젝트는 Intel RealSense D435 카메라를 이용해 발 모양을 3D 스캔하고,  
@@ -8,7 +8,7 @@ Open3D를 활용해 포인트 클라우드 처리, 정합, 노이즈 제거, 메
 
 ## 폴더 구조 및 파일 설명
 
-- 3D_foot_scanner/
+- 2025-casption1-3D-foot-code/
   - arduino/
     - esp32-button-motor-tracker-wifi.ino  
       (ESP32 기반 모터 제어 및 버튼 입력, Wi-Fi 통신 아두이노 코드)
