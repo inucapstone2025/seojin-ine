@@ -1,0 +1,18 @@
+# [사용법]
+# conda env create -f environment.yml
+# conda activate realsense
+
+name: realsense
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.8
+  - numpy=1.24.4
+  - scipy=1.10.1
+  - scikit-learn=1.3.2
+  - pip
+  - pip:
+      - open3d==0.19.0
+      - pyrealsense2==2.55.1.6486
+      - opencv-python==4.12.0.88

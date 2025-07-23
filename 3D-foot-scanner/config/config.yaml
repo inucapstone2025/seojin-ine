@@ -1,0 +1,24 @@
+# config.yaml
+
+base_dir: "data" # 데이터 저장 기본 폴더
+date_folder: "250529" # 데이터 저장 폴더1 - date
+user_folder: "24" # 데이터 저장 폴더2 - user
+# 폴더 구조 : base_dir/date_folder/user_folder
+
+camera:
+  enabled: false # 카메라 촬영 여부 (false or ture)
+  ip: "172.20.10.13"
+  port: 5000
+  degrees: [0, 45, 90, 135, 180, 225, 270, 315] # 촬영 각도
+
+filter:
+  center_point: [0.0, 0.0, 0.49] # 카메라와 target 지점부터의 거리 (원하는 위치로 변경 가능)
+  radius: 0.19 # center_point 로 부터 19cm 거리에 있는 것 제외하고는 삭제
+  y_min: -0.04 # # 발목 부분 -> 절대값으로 값 증가시키면 발목 더 많이 나옴
+  y_max: 0.053 # 바닥 제거 -> 값 높이면 바닥 더 많이 나옴
+
+align:
+  radius: 0.49 # 반지름 (m)
+
+merge:
+  voxel_size: 0.003
