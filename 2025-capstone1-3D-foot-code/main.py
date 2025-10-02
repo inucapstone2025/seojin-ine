@@ -7,6 +7,7 @@ from src.processing.transform import transform_and_save_point_cloud
 from src.processing.merge import multi_registration
 from src.processing.noise_removal import remove_background_color_from_file, dbscan_largest_clusters
 from src.processing.mesh_reconstruction import poisson_mesh_from_pcd
+from src.analysis.foot_measurement import measure_both_feet
 from src.utils.file_utils import create_dirs
 
 import socket
@@ -28,12 +29,17 @@ def main():
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((config["camera"]["ip"], config["camera"]["port"]))
 
-        for deg in config["camera"]["degrees"]:
+        #for deg in config["camera"]["degrees"]:
+        while True:
             get_data = client.recv(1024).decode().strip()
+            
             if not get_data:
                 continue
             if get_data == "end":
                 break
+
+            deg = int(get_data) # 수신된 각도 사용
+            print(f"[DEBUG] Received from ESP32: '{deg}'") # ===== 디버그 코드 출력 ===== 
 
             vertices, colors, _ = cam.capture()
             pcd = o3d.geometry.PointCloud()
@@ -79,6 +85,21 @@ def main():
 
     print("[4] 메쉬 재구성 완료")
     print("[완료] 모든 단계가 정상적으로 수행되었습니다.")
+
+    # 양 발 메쉬 측정
+    mesh_dir = paths["mesh_dir"]
+    if os.path.exists(mesh_dir):
+        print("\n[양 발 치수 측정 시작]")
+        results = measure_both_feet(mesh_dir)
+
+        # 결과 출력 요약
+        for file, extent in results:
+            print(f"\n[{file}]")
+            print(f"  발 길이 (X): {extent[0]:.2f} mm")
+            print(f"  발 폭 (Y): {extent[1]:.2f} mm")
+            print(f"  발 두께 (Z): {extent[2]:.2f} mm")
+    else:
+        print("❌ 메쉬 폴더를 찾을 수 없습니다:", mesh_dir)
 
 if __name__ == "__main__":
     main()
