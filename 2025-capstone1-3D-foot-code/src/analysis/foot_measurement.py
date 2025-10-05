@@ -113,7 +113,7 @@ def measure_both_feet(mesh_dir, gap=0.2):
         # === 원본 PLY 파일 로드 & 시각화 ===
         original_pcd = o3d.io.read_point_cloud(ply_path)
         frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)  # 좌표축 추가
-        print(f"\n📂 원본 시각화: {file}")
+        # print(f"\n📂 원본 시각화: {file}")
         o3d.visualization.draw_geometries([original_pcd, frame])
 
         # === 발 측정 & 시각화 ===
@@ -133,7 +133,7 @@ def measure_both_feet(mesh_dir, gap=0.2):
     frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)
     visuals.append(frame)
 
-    print("\n✅ 양 발 측정 완료 (시각화 시 X축 분리)")
+    # print("\n✅ 양 발 측정 완료 (시각화 시 X축 분리)")
     o3d.visualization.draw_geometries(visuals)
 
     return results
