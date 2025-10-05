@@ -2,7 +2,7 @@
 
 base_dir: "data" # 데이터 저장 기본 폴더
 date_folder: "250529" # 데이터 저장 폴더1 - date
-user_folder: "0" # 데이터 저장 폴더2 - user
+user_folder: "3" # 데이터 저장 폴더2 - user
 # 폴더 구조 : base_dir/date_folder/user_folder
 
 camera:
