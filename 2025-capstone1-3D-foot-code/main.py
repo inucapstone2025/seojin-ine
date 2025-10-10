@@ -7,7 +7,14 @@ from src.processing.transform import transform_and_save_point_cloud
 from src.processing.merge import multi_registration
 from src.processing.noise_removal import remove_background_color_from_file, dbscan_largest_clusters
 from src.processing.mesh_reconstruction import poisson_mesh_from_pcd
+from pathlib import Path
+
 from src.analysis.foot_measurement import measure_both_feet
+from src.analysis.reporting import (
+    format_measurement_summary,
+    save_measurements_csv,
+)
+from src.analysis.toe_detection import ToeDetectionParams
 from src.utils.file_utils import create_dirs
 
 import socket
@@ -86,18 +93,35 @@ def main():
     print("[4] 메쉬 재구성 완료")
     print("[완료] 모든 단계가 정상적으로 수행되었습니다.")
 
+    analysis_cfg = config.get("analysis", {})
+    toe_cfg = analysis_cfg.get("toe_detection", {})
+    toe_params = ToeDetectionParams(**toe_cfg) if toe_cfg else ToeDetectionParams()
+
     # 양 발 메쉬 측정
     mesh_dir = paths["mesh_dir"]
     if os.path.exists(mesh_dir):
         print("\n[양 발 치수 측정 시작]")
-        results = measure_both_feet(mesh_dir)
+        results = measure_both_feet(mesh_dir, toe_params=toe_params)
 
-        # 결과 출력 요약
-        for file, extent in results:
-            print(f"\n[{file}]")
-            print(f"  발 길이 (X): {extent[0]:.2f} mm")
-            print(f"  발 폭 (Y): {extent[1]:.2f} mm")
-            print(f"  발 두께 (Z): {extent[2]:.2f} mm")
+        measurement_entries = []
+
+        for result in results:
+            print(f"\n[{result.file_name}]")
+            print(
+                f"  AABB (mm) - X:{result.extent_mm[0]:.1f}, "
+                f"Y:{result.extent_mm[1]:.1f}, Z:{result.extent_mm[2]:.1f}"
+            )
+            if result.toe_measurements:
+                print("  " + format_measurement_summary(result.file_name, result.toe_measurements))
+                measurement_entries.append((result.file_name, result.toe_measurements))
+            else:
+                print("  ⚠️  발가락 자동 탐지 실패")
+
+        if measurement_entries:
+            analysis_dir = Path(paths["analysis_dir"])
+            csv_path = analysis_dir / "toe_measurements.csv"
+            save_measurements_csv(csv_path, measurement_entries)
+            print(f"\n[저장] 발가락 치수 CSV → {csv_path}")
     else:
         print("❌ 메쉬 폴더를 찾을 수 없습니다:", mesh_dir)
 

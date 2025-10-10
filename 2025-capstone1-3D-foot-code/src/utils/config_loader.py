@@ -15,8 +15,8 @@ def load_config(path=None):
         "raw_dir": os.path.join(user_base_dir, "raw"),
         "filtered_dir": os.path.join(user_base_dir, "filtered"),
         "aligned_dir": os.path.join(user_base_dir, "aligned"),
-        #"combined_dir": os.path.join(user_base_dir, "combined"),
         "mesh_dir": os.path.join(user_base_dir, "mesh"),
+        "analysis_dir": os.path.join(user_base_dir, "analysis"),
     }
 
     return config
