@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+.vscode/
+.DS_Store
+*.pyc
+*.pyo
+.pytest_cache/
+build/
+dist/
+**/tempCodeRunnerFile.py
