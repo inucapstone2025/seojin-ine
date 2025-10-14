@@ -38,7 +38,8 @@ def remove_background_color_from_file(pcd_path, green_threshold=30):
 
 def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_k=2):
     """
-    DBSCAN 클러스터링을 통해 가장 큰 상위 K개의 클러스터만 필터링하는 함수
+    DBSCAN 클러스터링을 통해 가장 큰 상위 K개의 클러스터만 필터링하고,
+    클러스터의 X축 중앙값을 기준으로 순서(top1/top2)를 결정하여 분리 저장 및 반환하는 함수.
 
     Parameters:
         pcd (o3d.geometry.PointCloud): 입력 포인트 클라우드
@@ -48,10 +49,13 @@ def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_
         top_k (int): 가장 큰 클러스터 개수 (기본값: 2)
 
     Returns:
-        top_pcd (o3d.geometry.PointCloud): 상위 K개 클러스터만 포함된 포인트 클라우드
-        top_clusters (np.ndarray or None): 추출된 클러스터 ID 목록 (없으면 None)
+        top_pcd (o3d.geometry.PointCloud): 상위 K개 클러스터만 포함된 포인트 클라우드 (합쳐진 형태)
+        cluster_pcd_list (list of dict): 각 클러스터별 PointCloud와 side 정보 [{'pcd': cluster_pcd, 'side': 'left'}, ...]
     """
-
+    
+    if top_k != 2:
+        print(f"[dbscan] 경고: top1/top2 좌우 판단을 위해 top_k는 2여야 합니다. 현재: {top_k}")
+        
     # DBSCAN 클러스터링 수행 (label: -1은 노이즈)
     labels = np.array(pcd.cluster_dbscan(eps=eps, min_points=min_points, print_progress=False))
 
@@ -69,26 +73,54 @@ def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_
         o3d.visualization.draw_geometries([pcd], window_name="Filtered Point Cloud")
         return pcd, None
 
-    # 가장 큰 top_k 클러스터 추출
-    top_clusters = unique[np.argsort(counts)[-top_k:]]
+    # 1. 가장 큰 top_k 클러스터 추출 (크기 순서로 ID 확보)
+    top_clusters_ids_size_order = unique[np.argsort(counts)[-top_k:]]
+    points = np.asarray(pcd.points)
+    colors = np.asarray(pcd.colors)
 
-    # top_k 클러스터에 해당하는 포인트만 필터링
-    mask = np.isin(labels, top_clusters)
-    filtered_points = np.asarray(pcd.points)[mask]
-    filtered_colors = np.asarray(pcd.colors)[mask]
+    clusters_data = []
 
-    # 새로운 포인트 클라우드 객체로 생성
-    top_pcd = o3d.geometry.PointCloud()
-    top_pcd.points = o3d.utility.Vector3dVector(filtered_points)
-    top_pcd.colors = o3d.utility.Vector3dVector(filtered_colors)
+    for cluster_id in top_clusters_ids_size_order:
+        mask = labels == cluster_id
+        cluster_points = points[mask]
+        cluster_colors = colors[mask]
+        median_x = np.median(cluster_points[:, 0])
 
-    print(f"[dbscan] 최종 출력 포인트 수 (상위 {top_k}개 클러스터): {len(filtered_points)}")
-    o3d.visualization.draw_geometries([top_pcd], window_name=f"Top {top_k} Clusters Only")
+        cluster_pcd = o3d.geometry.PointCloud()
+        cluster_pcd.points = o3d.utility.Vector3dVector(cluster_points)
+        cluster_pcd.colors = o3d.utility.Vector3dVector(cluster_colors)
+        
+        clusters_data.append({
+            'original_id': cluster_id,
+            'pcd': cluster_pcd,
+            'median_x': median_x
+        })
 
-    # 결과 저장
-    if aligned_dir is not None:
-        save_path = os.path.join(aligned_dir, "final_filtered_aligned.ply")
-        o3d.io.write_point_cloud(save_path, top_pcd)
-        print(f"[dbscan] 필터링 결과 저장 완료: {save_path}")
+    # 2. X축 중앙값 기준 정렬 (왼쪽 -> 오른쪽)
+    sorted_clusters = sorted(clusters_data, key=lambda x: x['median_x'])
 
-    return top_pcd, top_clusters
+    # 3. 클러스터별 리스트 생성
+    cluster_pcd_list = []
+
+    for i, data in enumerate(sorted_clusters):
+        cluster_pcd = data['pcd']
+
+        # 왼쪽/오른쪽 라벨
+        side_label = 'left' if i == 0 else 'right'
+        
+        cluster_pcd_list.append({
+            'pcd': cluster_pcd,
+            'side': side_label,
+            'original_id': data['original_id']
+        })
+
+        # 저장
+        if aligned_dir is not None:
+            top_label = f"top{i+1}"
+            save_path = os.path.join(aligned_dir, f"{top_label}_{side_label}.ply")
+            o3d.io.write_point_cloud(save_path, cluster_pcd)
+            print(f"[dbscan] 필터링 결과 저장 완료: {save_path}")
+        
+        print(f"[dbscan] {top_label} ({side_label}, Original ID {data['original_id']}): Points {len(cluster_pcd.points)}, Median X {data['median_x']:.4f}")
+
+    return cluster_pcd_list

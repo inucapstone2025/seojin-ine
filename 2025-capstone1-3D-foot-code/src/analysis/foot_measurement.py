@@ -15,40 +15,6 @@ def rotation_matrix_from_vectors(vec1, vec2):
                      [-v[1], v[0], 0]])
     return np.eye(3) + kmat + kmat @ kmat * ((1 - c) / (s ** 2))
 
-# 여기부분 수정 필요!!
-# def measure_foot(ply_path):
-#     """단일 발 PLY 파일 처리 및 치수 계산"""
-#     pcd = o3d.io.read_point_cloud(ply_path)
-#     points = np.asarray(pcd.points)
-
-#     # OBB 주축 → 발끝/뒤꿈치 탐색
-#     obb = pcd.get_oriented_bounding_box()
-#     main_axis = obb.R[:, 0]
-#     projections = points @ main_axis
-#     toe_point = points[np.argmax(projections)]
-#     heel_point = points[np.argmin(projections)]
-
-#     # 발끝-뒤꿈치 벡터 → X축 정렬
-#     foot_vector = toe_point - heel_point
-#     foot_dir = foot_vector / np.linalg.norm(foot_vector)
-#     R_align = rotation_matrix_from_vectors(foot_dir, np.array([0, 0, 1]))
-
-#     # 점군 회전
-#     rotated_points = points @ R_align.T
-#     rotated_pcd = o3d.geometry.PointCloud()
-#     rotated_pcd.points = o3d.utility.Vector3dVector(rotated_points)
-
-#     # AABB 계산
-#     aabb = rotated_pcd.get_axis_aligned_bounding_box()
-#     aabb.color = (1, 0, 0)
-#     extent = aabb.get_extent() * 1000  # mm 단위
-
-#     print(f"\n[발 측정 결과: {os.path.basename(ply_path)}]")
-#     print(f"  가로 (X, 발 길이): {extent[0]:.2f} mm")
-#     print(f"  세로 (Y, 발 폭): {extent[1]:.2f} mm")
-#     print(f"  높이 (Z, 발 두께): {extent[2]:.2f} mm")
-
-#     return rotated_pcd, aabb, extent
 def measure_foot(ply_path):
     """단일 발 PLY 파일 처리 및 치수 계산"""
     pcd = o3d.io.read_point_cloud(ply_path)
@@ -111,10 +77,9 @@ def measure_both_feet(mesh_dir, gap=0.2):
         ply_path = os.path.join(mesh_dir, file)
 
         # === 원본 PLY 파일 로드 & 시각화 ===
-        original_pcd = o3d.io.read_point_cloud(ply_path)
-        frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)  # 좌표축 추가
-        # print(f"\n📂 원본 시각화: {file}")
-        o3d.visualization.draw_geometries([original_pcd, frame])
+        # original_pcd = o3d.io.read_point_cloud(ply_path)
+        # frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)  # 좌표축 추가
+        # o3d.visualization.draw_geometries([original_pcd, frame])
 
         # === 발 측정 & 시각화 ===
         rotated_pcd, aabb, extent = measure_foot(ply_path)
