@@ -230,7 +230,8 @@ def measure_foot(
         params = toe_params or ToeDetectionParams()
         detection = detect_toe_tips(points, axes, params)
     measurements = compute_toe_measurements(axes, detection) if detection else None
-    aligned_debug, world_debug = _build_debug_geometries(aligned_points, axes, detection)
+    # aligned_debug, world_debug = _build_debug_geometries(aligned_points, axes, detection)
+    aligned_debug, world_debug = [], []
 
     return FootMeasurementResult(
         file_name=path.name,
@@ -320,20 +321,20 @@ def measure_both_feet(
 
         results.append(result)
 
-    if visuals:
-        frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)
-        visuals.append(frame)
-        o3d.visualization.draw_geometries(
-            visuals,
-            window_name="Foot Debug (Aligned Frame)",
-        )
+    # if visuals:
+    #     frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)
+    #     visuals.append(frame)
+    #     o3d.visualization.draw_geometries(
+    #         visuals,
+    #         window_name="Foot Debug (Aligned Frame)",
+    #     )
 
-    if debug_options.show_world_view and world_visuals:
-        frame_world = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)
-        world_visuals.append(frame_world)
-        o3d.visualization.draw_geometries(
-            world_visuals,
-            window_name="Foot Debug (Merged Cloud)",
-        )
+    # if debug_options.show_world_view and world_visuals:
+    #     frame_world = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)
+    #     world_visuals.append(frame_world)
+    #     o3d.visualization.draw_geometries(
+    #         world_visuals,
+    #         window_name="Foot Debug (Merged Cloud)",
+    #     )
 
     return results

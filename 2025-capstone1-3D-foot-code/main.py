@@ -14,6 +14,7 @@ from src.analysis.reporting import (
     save_measurements_csv,
 )
 from src.analysis.toe_detection import ToeDetectionParams
+from src.analysis.footprint_extraction import extract_right_footprint
 from src.utils.file_utils import create_dirs
 
 import socket
@@ -103,6 +104,8 @@ def main():
     toe_detection_enabled = toe_cfg.pop("enabled", True)
     toe_params = ToeDetectionParams(**toe_cfg) if toe_detection_enabled else None
     debug_cfg = dict(analysis_cfg.get("debug", {}))
+    footprint_cfg = dict(analysis_cfg.get("footprint", {}))
+    footprint_enabled = footprint_cfg.pop("enabled", False)
 
     # 양 발 메쉬 측정
     mesh_dir = paths["mesh_dir"]
@@ -135,6 +138,29 @@ def main():
             csv_path = analysis_dir / "toe_measurements.csv"
             save_measurements_csv(csv_path, measurement_entries)
             print(f"\n[저장] 발가락 치수 CSV → {csv_path}")
+
+        if footprint_enabled:
+            try:
+                footprint_result = extract_right_footprint(
+                    filtered_pcd,
+                    distance_threshold_mm=footprint_cfg.get("distance_threshold_mm", 3.0),
+                    ransac_n=footprint_cfg.get("ransac_n", 3),
+                    num_iterations=footprint_cfg.get("num_iterations", 2000),
+                    voxel_size_m=footprint_cfg.get("voxel_size_m", 0.002),
+                    bottom_ratio=footprint_cfg.get("bottom_ratio", 0.3),
+                    alpha=footprint_cfg.get("alpha"),
+                    alpha_k_neighbors=footprint_cfg.get("alpha_k_neighbors", 8),
+                    foot_side=footprint_cfg.get("foot_side", "right"),
+                    cluster_eps=footprint_cfg.get("cluster_eps", 0.03),
+                    cluster_min_samples=footprint_cfg.get("cluster_min_samples", 80),
+                    visualize=footprint_cfg.get("visualize", True),
+                )
+                print(
+                    f"\n[Footprint] length={footprint_result.length_mm:.1f} mm, "
+                    f"width={footprint_result.width_mm:.1f} mm, alpha={footprint_result.alpha_used:.4f}"
+                )
+            except Exception as footprint_error:
+                print("[경고] Footprint extraction 실패:", footprint_error)
     else:
         print("❌ 메쉬 폴더를 찾을 수 없습니다:", mesh_dir)
 

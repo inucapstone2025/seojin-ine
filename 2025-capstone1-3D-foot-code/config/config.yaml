@@ -36,3 +36,16 @@ analysis:
     show_bounding_box: false
     show_world_view: true
     show_world_reference: true
+  footprint:
+    enabled: true
+    distance_threshold_mm: 3.0
+    ransac_n: 3
+    num_iterations: 2000
+    voxel_size_m: 0.0025
+    bottom_ratio: 0.70
+    alpha: null
+    alpha_k_neighbors: 8
+    foot_side: right
+    cluster_eps: 0.04
+    cluster_min_samples: 40
+    visualize: true
