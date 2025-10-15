@@ -108,6 +108,11 @@ def measure_both_feet(mesh_dir, gap=0.2):
         rotated_pcd.translate(translation)
         aabb.translate(translation)
 
+        # # === (추가) 개별 발 시각화 ===
+        # print(f"\n🦶 개별 발 시각화: {file}")
+        # frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1)
+        # o3d.visualization.draw_geometries([rotated_pcd, aabb, frame])
+
         visuals.append(rotated_pcd)
         visuals.append(aabb)
         results.append((file, extent))
@@ -119,6 +124,7 @@ def measure_both_feet(mesh_dir, gap=0.2):
     # print("\n✅ 양 발 측정 완료 (시각화 시 X축 분리)")
     o3d.visualization.draw_geometries(visuals)
 
-    return results
+    # visuals = [왼발_pcd, 왼발_aabb, 오른발_pcd, 오른발_aabb, frame]
+    return results, visuals
 
 

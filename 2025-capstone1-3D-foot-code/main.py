@@ -8,12 +8,17 @@ from src.processing.merge import multi_registration
 from src.processing.noise_removal import remove_background_color_from_file, dbscan_largest_clusters
 from src.processing.mesh_reconstruction import poisson_mesh_from_clusters
 from src.analysis.foot_measurement import measure_both_feet
+from src.analysis.foot_bti import analyze_foot_bti
 from src.utils.file_utils import create_dirs
+from src.display.fbti_info import get_qr_image, fbti_qr_map
 
 import socket
 import open3d as o3d
 import numpy as np
 import os
+from PIL import Image
+import cv2
+
 
 def main():
     # 설정 불러오기
@@ -90,9 +95,39 @@ def main():
     mesh_dir = paths["mesh_dir"]
     if os.path.exists(mesh_dir):
         # print("\n[양 발 치수 측정 시작]")
-        results = measure_both_feet(mesh_dir)
+        results, visuals = measure_both_feet(mesh_dir)
     else:
         print("❌ 메쉬 폴더를 찾을 수 없습니다:", mesh_dir)
+
+    left_pcd = visuals[0]
+    left_aabb = visuals[1]
+
+
+    bti_results = analyze_foot_bti(left_pcd, left_aabb)
+    print("===== 발BTI 분석 결과 =====")
+    for key, value in bti_results.items():
+        print(f"{key}: {value}")
+
+    # BTI 조합 문자열 만들기 (예: EWIL)
+    bti_combination = bti_results["shape"] + bti_results["width"] + bti_results["instep"] + bti_results["arch"]
+
+    # QR 이미지 열기
+    # try:
+    #     qr_img = get_qr_image(bti_combination)
+    #     qr_img.show()  # 기본 이미지 뷰어로 표시
+    # except FileNotFoundError as e:
+    #     print(e)
+
+    # OpenCV로 QR 이미지 표시
+    qr_path = fbti_qr_map.get(bti_combination)
+    if qr_path and os.path.exists(qr_path):
+        img = cv2.imread(qr_path)
+        cv2.imshow(f"FBTI QR - {bti_combination}", img)
+        print(f"[INFO] {bti_combination} QR 이미지 표시 중... 키 입력 후 창 닫기")
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    else:
+        print(f"❌ {bti_combination}에 대한 QR 이미지가 없습니다.")
 
 if __name__ == "__main__":
     main()
