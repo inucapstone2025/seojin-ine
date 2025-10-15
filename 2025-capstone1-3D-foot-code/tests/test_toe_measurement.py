@@ -77,6 +77,8 @@ class ToeMeasurementTest(unittest.TestCase):
         axes = compute_foot_axes(self.points)
         aligned = align_points_to_axes(self.points, axes)
         self.assertTrue(np.allclose(aligned.min(axis=0)[0], 0.0, atol=5e-3))
+        self.assertTrue(np.allclose(aligned.min(axis=0)[2], 0.0, atol=5e-3))
+        self.assertLess(abs(np.dot(axes.foot_axis, axes.vertical_axis)), 1e-3)
 
 
 if __name__ == "__main__":

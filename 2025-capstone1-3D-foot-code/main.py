@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from src.utils.config_loader import load_config
-from src.capture.realsense_capture import py_Realsense
 from src.processing.filter import filter_by_distance_and_ymin
 from src.processing.transform import transform_and_save_point_cloud
 from src.processing.merge import multi_registration
@@ -32,28 +31,34 @@ def main():
 
     # 1. 카메라 촬영 (enabled 시에만)
     if config["camera"]["enabled"]:
+        try:
+            from src.capture.realsense_capture import py_Realsense
+        except ModuleNotFoundError as exc:
+            raise RuntimeError(
+                "RealSense 촬영을 사용하려면 'pyrealsense2' 패키지가 필요합니다. "
+                "패키지를 설치하거나 config.yaml에서 camera.enabled 값을 false로 설정하세요."
+            ) from exc
+
         cam = py_Realsense()
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((config["camera"]["ip"], config["camera"]["port"]))
 
-        #for deg in config["camera"]["degrees"]:
         while True:
             get_data = client.recv(1024).decode().strip()
-            
+
             if not get_data:
                 continue
             if get_data == "end":
                 break
 
-            deg = int(get_data) # 수신된 각도 사용
-            print(f"[DEBUG] Received from ESP32: '{deg}'") # ===== 디버그 코드 출력 ===== 
+            deg = int(get_data)
+            print(f"[DEBUG] Received from ESP32: '{deg}'")
 
             vertices, colors, _ = cam.capture()
             pcd = o3d.geometry.PointCloud()
             pcd.points = o3d.utility.Vector3dVector(np.array([v.tolist() for v in vertices]))
             pcd.colors = o3d.utility.Vector3dVector(colors / 255.0)
 
-            # raw ply만 저장 (필터링 파일은 여기서 만들지 않음)
             save_path = os.path.join(paths["raw_dir"], f"cloud_{deg}_raw.ply")
             o3d.io.write_point_cloud(save_path, pcd)
 
@@ -94,14 +99,22 @@ def main():
     print("[완료] 모든 단계가 정상적으로 수행되었습니다.")
 
     analysis_cfg = config.get("analysis", {})
-    toe_cfg = analysis_cfg.get("toe_detection", {})
-    toe_params = ToeDetectionParams(**toe_cfg) if toe_cfg else ToeDetectionParams()
+    toe_cfg = dict(analysis_cfg.get("toe_detection", {}))
+    toe_detection_enabled = toe_cfg.pop("enabled", True)
+    toe_params = ToeDetectionParams(**toe_cfg) if toe_detection_enabled else None
+    debug_cfg = dict(analysis_cfg.get("debug", {}))
 
     # 양 발 메쉬 측정
     mesh_dir = paths["mesh_dir"]
     if os.path.exists(mesh_dir):
         print("\n[양 발 치수 측정 시작]")
-        results = measure_both_feet(mesh_dir, toe_params=toe_params)
+        results = measure_both_feet(
+            mesh_dir,
+            toe_params=toe_params,
+            toe_detection_enabled=toe_detection_enabled,
+            debug_config=debug_cfg,
+            reference_cloud=filtered_pcd,
+        )
 
         measurement_entries = []
 

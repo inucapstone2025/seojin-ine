@@ -25,7 +25,14 @@ merge:
 
 analysis:
   toe_detection:
+    enabled: false
     forefoot_slice_depth: 0.03
     dbscan_eps: 0.01
     dbscan_min_samples: 12
     min_cluster_size: 80
+  debug:
+    single_foot_index: 0
+    show_aligned_cloud: false
+    show_bounding_box: false
+    show_world_view: true
+    show_world_reference: true

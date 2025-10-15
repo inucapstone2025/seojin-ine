@@ -35,8 +35,8 @@ def _ensure_unit(vector: np.ndarray) -> np.ndarray:
     return vector / norm
 
 
-def compute_foot_axes(points: np.ndarray) -> FootAxes:
-    """Estimate heel/toe and principal axes from a point set."""
+def compute_foot_axes(points: np.ndarray, bottom_quantile: float = 0.25) -> FootAxes:
+    """Estimate heel/toe axes prioritising the plantar surface."""
 
     if points.ndim != 2 or points.shape[1] != 3:
         raise ValueError("points must be of shape (N, 3)")
@@ -46,30 +46,67 @@ def compute_foot_axes(points: np.ndarray) -> FootAxes:
 
     cov = np.cov(centered, rowvar=False)
     eigvals, eigvecs = np.linalg.eigh(cov)
-    order = np.argsort(eigvals)[::-1]
-    principal_axes = eigvecs[:, order]
+    order = np.argsort(eigvals)
 
-    foot_axis = _ensure_unit(principal_axes[:, 0])
-    width_axis = _ensure_unit(principal_axes[:, 1])
+    vertical_ref = _ensure_unit(eigvecs[:, order[0]])
+    if vertical_ref[2] < 0:
+        vertical_ref = -vertical_ref
+
+    vertical_proj = centered @ vertical_ref
+    if 0.0 < bottom_quantile < 1.0:
+        threshold = float(np.quantile(vertical_proj, bottom_quantile))
+    else:
+        threshold = float(np.min(vertical_proj))
+
+    bottom_mask = vertical_proj <= threshold + 1e-6
+    if np.count_nonzero(bottom_mask) < 50:
+        threshold = float(np.min(vertical_proj) + 0.005)
+        bottom_mask = vertical_proj <= threshold
+
+    if np.count_nonzero(bottom_mask) == 0:
+        bottom_mask = np.ones(points.shape[0], dtype=bool)
+
+    bottom_points = centered[bottom_mask]
+    bottom_proj = vertical_proj[bottom_mask][:, None]
+    planar_points = bottom_points - bottom_proj * vertical_ref
+
+    planar_cov = np.cov(planar_points, rowvar=False)
+    planar_vals, planar_vecs = np.linalg.eigh(planar_cov)
+    planar_order = np.argsort(planar_vals)[::-1]
+    foot_axis = _ensure_unit(planar_vecs[:, planar_order[0]])
+
+    if abs(np.dot(foot_axis, vertical_ref)) > 0.95:
+        fallback_axis = eigvecs[:, order[-1]]
+        foot_axis = _ensure_unit(
+            fallback_axis - np.dot(fallback_axis, vertical_ref) * vertical_ref
+        )
+
+    width_axis = _ensure_unit(np.cross(vertical_ref, foot_axis))
+    if np.linalg.norm(width_axis) < 1e-6:
+        width_axis = _ensure_unit(np.cross(foot_axis, vertical_ref))
+
     vertical_axis = _ensure_unit(np.cross(foot_axis, width_axis))
-    width_axis = _ensure_unit(np.cross(vertical_axis, foot_axis))
-
-    projections = centered @ foot_axis
-    heel_idx = np.argmin(projections)
-    toe_idx = np.argmax(projections)
-
-    heel_point = points[heel_idx]
-    toe_point = points[toe_idx]
-
-    heel_to_toe = toe_point - heel_point
-    if np.dot(heel_to_toe, foot_axis) < 0:
-        foot_axis = -foot_axis
+    if np.dot(vertical_axis, vertical_ref) < 0:
         vertical_axis = -vertical_axis
-        projections = centered @ foot_axis
-        heel_idx = np.argmin(projections)
-        toe_idx = np.argmax(projections)
-        heel_point = points[heel_idx]
-        toe_point = points[toe_idx]
+        width_axis = -width_axis
+
+    foot_proj = centered @ foot_axis
+    bottom_indices = np.nonzero(bottom_mask)[0]
+    heel_candidate_idx = bottom_indices[np.argmin(foot_proj[bottom_mask])]
+    toe_candidate_idx = bottom_indices[np.argmax(foot_proj[bottom_mask])]
+
+    heel_point = points[heel_candidate_idx]
+    toe_point = points[toe_candidate_idx]
+
+    if np.dot(toe_point - heel_point, foot_axis) < 0:
+        foot_axis = -foot_axis
+        width_axis = -width_axis
+        vertical_axis = -vertical_axis
+        foot_proj = centered @ foot_axis
+        heel_candidate_idx = bottom_indices[np.argmin(foot_proj[bottom_mask])]
+        toe_candidate_idx = bottom_indices[np.argmax(foot_proj[bottom_mask])]
+        heel_point = points[heel_candidate_idx]
+        toe_point = points[toe_candidate_idx]
 
     rotation = np.column_stack((foot_axis, width_axis, vertical_axis))
 

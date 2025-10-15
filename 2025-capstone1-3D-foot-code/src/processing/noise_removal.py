@@ -57,7 +57,7 @@ def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_
 
     if labels.size == 0 or np.max(labels) < 0:
         print("[dbscan] 클러스터가 없음")
-        o3d.visualization.draw_geometries([pcd], window_name="Filtered Point Cloud")
+        # o3d.visualization.draw_geometries([pcd], window_name="Filtered Point Cloud")
         return pcd, None
 
     # 노이즈 제외한 클러스터만 고려
@@ -66,7 +66,7 @@ def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_
 
     if len(unique) == 0:
         print("[dbscan] 유효한 클러스터가 없음")
-        o3d.visualization.draw_geometries([pcd], window_name="Filtered Point Cloud")
+        # o3d.visualization.draw_geometries([pcd], window_name="Filtered Point Cloud")
         return pcd, None
 
     # 가장 큰 top_k 클러스터 추출
@@ -83,7 +83,7 @@ def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_
     top_pcd.colors = o3d.utility.Vector3dVector(filtered_colors)
 
     print(f"[dbscan] 최종 출력 포인트 수 (상위 {top_k}개 클러스터): {len(filtered_points)}")
-    o3d.visualization.draw_geometries([top_pcd], window_name=f"Top {top_k} Clusters Only")
+    # o3d.visualization.draw_geometries([top_pcd], window_name=f"Top {top_k} Clusters Only")
 
     # 결과 저장
     if aligned_dir is not None:

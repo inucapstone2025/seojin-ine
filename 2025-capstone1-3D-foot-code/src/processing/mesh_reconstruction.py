@@ -43,7 +43,7 @@ def poisson_mesh_from_pcd(pcd, top_clusters=None, eps=0.01, mesh_dir=None):
             print(f"[mesh] 메쉬 저장 완료: {save_path}")
 
         # 시각화
-        o3d.visualization.draw_geometries([mesh], window_name="Poisson Mesh")
+        # o3d.visualization.draw_geometries([mesh], window_name="Poisson Mesh")
         return [mesh]
 
     # 클러스터별 메쉬 생성
@@ -82,16 +82,21 @@ def poisson_mesh_from_pcd(pcd, top_clusters=None, eps=0.01, mesh_dir=None):
             o3d.io.write_triangle_mesh(save_path, mesh)
             print(f"[mesh] 클러스터 {i+1} 메쉬 저장 완료: {save_path}")
 
-        # 🔹 개별 클러스터 메쉬 시각화 (추가)
-        o3d.visualization.draw_geometries([mesh],
-                                        window_name=f"Cluster {i+1} Mesh",
-                                        width=800,
-                                        height=600,
-                                        mesh_show_back_face=True)
+        # # 🔹 개별 클러스터 메쉬 시각화 (추가)
+        # o3d.visualization.draw_geometries(
+        #     [mesh],
+        #     window_name=f"Cluster {i+1} Mesh",
+        #     width=800,
+        #     height=600,
+        #     mesh_show_back_face=True,
+        # )
 
         meshes.append(mesh)
 
-    # 모든 클러스터 메쉬 시각화
-    o3d.visualization.draw_geometries(meshes, window_name=f"Poisson Meshes (Top {len(top_clusters)} Clusters)")
+    # # 모든 클러스터 메쉬 시각화
+    # o3d.visualization.draw_geometries(
+    #     meshes,
+    #     window_name=f"Poisson Meshes (Top {len(top_clusters)} Clusters)"
+    # )
 
     return meshes
