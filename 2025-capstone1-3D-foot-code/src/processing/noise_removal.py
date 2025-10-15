@@ -49,7 +49,6 @@ def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_
         top_k (int): 가장 큰 클러스터 개수 (기본값: 2)
 
     Returns:
-        top_pcd (o3d.geometry.PointCloud): 상위 K개 클러스터만 포함된 포인트 클라우드 (합쳐진 형태)
         cluster_pcd_list (list of dict): 각 클러스터별 PointCloud와 side 정보 [{'pcd': cluster_pcd, 'side': 'left'}, ...]
     """
     

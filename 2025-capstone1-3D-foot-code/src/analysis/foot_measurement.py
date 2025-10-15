@@ -21,12 +21,24 @@ def measure_foot(ply_path):
     points = np.asarray(pcd.points)
 
     # OBB 계산
-    obb = pcd.get_oriented_bounding_box()
+    # obb = pcd.get_oriented_bounding_box()
 
-    # === (1) OBB에서 제일 긴 축 찾기 ===
-    extents = obb.extent            # [x_len, y_len, z_len] (길이)
-    axes = obb.R                    # 각 축 방향 (3x3 matrix)
-    main_axis = axes[:, np.argmax(extents)]  # 제일 긴 축 방향 벡터
+    # # === (1) OBB에서 제일 긴 축 찾기 ===
+    # extents = obb.extent            # [x_len, y_len, z_len] (길이)
+    # axes = obb.R                    # 각 축 방향 (3x3 matrix)
+    # main_axis = axes[:, np.argmax(extents)]  # 제일 긴 축 방향 벡터
+
+    # # === (2) 발끝/뒤꿈치 결정 ===
+    # projections = points @ main_axis
+    # toe_point = points[np.argmax(projections)]
+    # heel_point = points[np.argmin(projections)]
+
+    # === (1) Y축 고정: XZ 평면에서만 PCA 정렬 ===
+    points_xz = points[:, [0, 2]]  # XZ 평면 사용 (Y는 높이)
+    C = np.cov(points_xz.T)
+    eigenvalues, eigenvectors = np.linalg.eig(C)
+    main_axis_2d = eigenvectors[:, np.argmax(eigenvalues)]
+    main_axis = np.array([main_axis_2d[0], 0, main_axis_2d[1]])
 
     # === (2) 발끝/뒤꿈치 결정 ===
     projections = points @ main_axis
@@ -46,6 +58,12 @@ def measure_foot(ply_path):
 
     # 점군 회전
     rotated_points = points @ R_align.T
+
+    # === (추가) 발목 부분 제거 ===
+    # y_values = rotated_points[:, 1]  # Y축이 높이라면
+    # threshold = np.percentile(y_values, 80)  # 상위 10% 잘라냄 (발목 제거)
+    # rotated_points = rotated_points[y_values < threshold]
+
     rotated_pcd = o3d.geometry.PointCloud()
     rotated_pcd.points = o3d.utility.Vector3dVector(rotated_points)
 
@@ -56,7 +74,7 @@ def measure_foot(ply_path):
 
     print(f"\n[발 측정 결과: {os.path.basename(ply_path)}]")
     print(f"  길이 (Z, 발 길이): {extent[2]:.2f} mm")
-    print(f"  폭   (X): {extent[0]:.2f} mm")
+    print(f"  너비 (X): {extent[0]:.2f} mm")
     print(f"  두께 (Y): {extent[1]:.2f} mm")
 
     return rotated_pcd, aabb, extent

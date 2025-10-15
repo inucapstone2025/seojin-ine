@@ -29,7 +29,6 @@ def main():
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((config["camera"]["ip"], config["camera"]["port"]))
 
-        #for deg in config["camera"]["degrees"]:
         while True:
             get_data = client.recv(1024).decode().strip()
             
@@ -92,15 +91,8 @@ def main():
     if os.path.exists(mesh_dir):
         # print("\n[양 발 치수 측정 시작]")
         results = measure_both_feet(mesh_dir)
-
-        # 결과 출력 요약
-    #     for file, extent in results:
-    #         print(f"\n[{file}]")
-    #         print(f"  발 길이 (X): {extent[0]:.2f} mm")
-    #         print(f"  발 폭 (Y): {extent[1]:.2f} mm")
-    #         print(f"  발 두께 (Z): {extent[2]:.2f} mm")
-    # else:
-    #     print("❌ 메쉬 폴더를 찾을 수 없습니다:", mesh_dir)
+    else:
+        print("❌ 메쉬 폴더를 찾을 수 없습니다:", mesh_dir)
 
 if __name__ == "__main__":
     main()

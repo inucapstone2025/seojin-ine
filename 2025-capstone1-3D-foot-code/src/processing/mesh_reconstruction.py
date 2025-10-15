@@ -32,7 +32,7 @@ def poisson_mesh_from_clusters(cluster_pcd_list, mesh_dir=None):
             print(f"[mesh] {side_label} 메쉬 저장 완료: {save_path}")
 
         # 시각화
-        o3d.visualization.draw_geometries([mesh], window_name=f"{side_label.capitalize()} Mesh")
+        # o3d.visualization.draw_geometries([mesh], window_name=f"{side_label.capitalize()} Mesh")
         meshes.append(mesh)
 
     return meshes
