@@ -11,6 +11,7 @@ from src.analysis.foot_measurement import measure_both_feet
 from src.analysis.foot_bti import analyze_foot_bti
 from src.utils.file_utils import create_dirs
 from src.display.fbti_info import get_qr_image, fbti_qr_map
+from web_ui.server import launch_web_ui
 
 import socket
 import open3d as o3d
@@ -28,37 +29,50 @@ def main():
     # 필요한 폴더들 생성
     create_dirs(paths.values())
 
-    # 1. 카메라 촬영 (enabled 시에만)
-    if config["camera"]["enabled"]:
-        cam = py_Realsense()
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect((config["camera"]["ip"], config["camera"]["port"]))
-
-        while True:
-            get_data = client.recv(1024).decode().strip()
-            
-            if not get_data:
-                continue
-            if get_data == "end":
-                break
-
-            deg = int(get_data) # 수신된 각도 사용
-            print(f"[DEBUG] Received from ESP32: '{deg}'") # ===== 디버그 코드 출력 ===== 
-
-            vertices, colors, _ = cam.capture()
-            pcd = o3d.geometry.PointCloud()
-            pcd.points = o3d.utility.Vector3dVector(np.array([v.tolist() for v in vertices]))
-            pcd.colors = o3d.utility.Vector3dVector(colors / 255.0)
-
-            # raw ply만 저장 (필터링 파일은 여기서 만들지 않음)
-            save_path = os.path.join(paths["raw_dir"], f"cloud_{deg}_raw.ply")
-            o3d.io.write_point_cloud(save_path, pcd)
-
-            client.send(b"go\n")
-
-        print("[1] 카메라 촬영 완료")
+    if config["mode"]["use_raspberry_pi"]:
+        print("[MODE] Raspberry Pi 원격 촬영 모드 → 웹 UI 사용")
+        session_dir = launch_web_ui(config)
+        if not session_dir:
+            print("Pi 촬영 실패")
+            return
+        paths["raw_dir"] = os.path.join(session_dir, "raw")
+        paths["filtered_dir"] = os.path.join(session_dir, "filtered")
+        paths["aligned_dir"] = os.path.join(session_dir, "aligned")
+        paths["mesh_dir"] = os.path.join(session_dir, "mesh")
     else:
-        print("[1] 카메라 촬영 비활성화 (이미 저장된 raw 파일 사용)")
+        print("[MODE] 로컬 RealSense 촬영 모드")
+
+        # 1. 카메라 촬영 (enabled 시에만)
+        if config["camera"]["enabled"]:
+            cam = py_Realsense()
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.connect((config["camera"]["ip"], config["camera"]["port"]))
+
+            while True:
+                get_data = client.recv(1024).decode().strip()
+                
+                if not get_data:
+                    continue
+                if get_data == "end":
+                    break
+
+                deg = int(get_data) # 수신된 각도 사용
+                print(f"[DEBUG] Received from ESP32: '{deg}'") # ===== 디버그 코드 출력 ===== 
+
+                vertices, colors, _ = cam.capture()
+                pcd = o3d.geometry.PointCloud()
+                pcd.points = o3d.utility.Vector3dVector(np.array([v.tolist() for v in vertices]))
+                pcd.colors = o3d.utility.Vector3dVector(colors / 255.0)
+
+                # raw ply만 저장 (필터링 파일은 여기서 만들지 않음)
+                save_path = os.path.join(paths["raw_dir"], f"cloud_{deg}_raw.ply")
+                o3d.io.write_point_cloud(save_path, pcd)
+
+                client.send(b"go\n")
+
+            print("[1] 카메라 촬영 완료")
+        else:
+            print("[1] 카메라 촬영 비활성화 (이미 저장된 raw 파일 사용)")
 
     # 2. 필터링
     print("[2] 필터링 시작")
@@ -95,13 +109,12 @@ def main():
     mesh_dir = paths["mesh_dir"]
     if os.path.exists(mesh_dir):
         # print("\n[양 발 치수 측정 시작]")
-        results, visuals = measure_both_feet(mesh_dir)
+        results, visuals, measurements = measure_both_feet(mesh_dir)
     else:
         print("❌ 메쉬 폴더를 찾을 수 없습니다:", mesh_dir)
 
     left_pcd = visuals[0]
     left_aabb = visuals[1]
-
 
     bti_results = analyze_foot_bti(left_pcd, left_aabb)
     print("===== 발BTI 분석 결과 =====")

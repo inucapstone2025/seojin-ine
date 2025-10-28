@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RunSync • D435 원격 촬영</title>
+    <style>
+        :root {
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        }
+
+        body {
+            margin: 0;
+            background: #0b0d10;
+            color: #eef2f7;
+        }
+
+        /* 캔버스 컨테이너가 확실한 크기를 갖도록 */
+        #three-canvas {
+            width: 100%;
+            height: 80vh;
+            /* 필요 70~90vh로 조정 */
+            display: block;
+            /* 캔버스 왜곡 방지 */
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .wrap {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .card {
+            background: #11151a;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .25);
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button[disabled] {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mt {
+            margin-top: 16px;
+        }
+
+        .status {
+            margin-top: 12px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .viewer {
+            height: 560px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #0a0f1a;
+            border: 1px solid #1f2937;
+            margin-top: 16px;
+        }
+
+        .meta {
+            font-size: 13px;
+            color: #a3a3a3;
+            margin-top: 8px;
+        }
+
+        a {
+            color: #93c5fd;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="card">
+            <h1>RPi D435 원격 촬영</h1>
+            <div class="row">
+                <div>
+                    <label>이름</label>
+                    <input id="name" placeholder="홍길동" />
+                </div>
+                <div>
+                    <label>성별</label>
+                    <select id="gender">
+                        <option value="F">여성</option>
+                        <option value="M">남성</option>
+                        <option value="U" selected>미설정</option>
+                    </select>
+                </div>
+            </div>
+            <button class="mt" id="btn">촬영 시작(단일)</button>
+            <button class="mt" id="btn360">360° 스캔(8장)</button>
+            <div id="status" class="status">준비됨</div>
+
+
+            <div id="viewer" class="viewer"></div>
+            <div id="meta" class="meta"></div>
+        </div>
+    </div>
+
+
+    <!-- three.js + plugins (from CDN) -->
+    <script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+    }
+}
+</script>
+
+    <script type="module" src="./js/viewer.js"></script>
+</body>
+
+</html>

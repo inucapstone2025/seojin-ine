@@ -19,4 +19,11 @@ def load_config(path=None):
         "mesh_dir": os.path.join(user_base_dir, "mesh"),
     }
 
+    mode_cfg = config.get("mode", {})
+    config["mode"] = {
+        "use_raspberry_pi": mode_cfg.get("use_raspberry_pi", False),
+        "pi_api_base": mode_cfg.get("pi_api_base", "http://localhost:8000"),
+        "capture_token": mode_cfg.get("capture_token", "changeme-token"),
+    }
+
     return config
