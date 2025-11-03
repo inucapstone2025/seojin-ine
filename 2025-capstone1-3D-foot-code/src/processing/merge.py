@@ -55,11 +55,11 @@ def multi_registration(pcd_files, voxel_size=0.005, save_path=None):
     """
     # 모든 파일에서 포인트 클라우드 로드
     pcds = [o3d.io.read_point_cloud(f) for f in pcd_files]
-    print(f"[merge] 총 {len(pcds)}개 포인트 클라우드 로드 완료")
+    # print(f"[merge] 총 {len(pcds)}개 포인트 클라우드 로드 완료")
 
     target = pcds[0]
     for i in range(1, len(pcds)):
-        print(f"[merge] 정합 중: {i}/{len(pcds)-1}")
+        # print(f"[merge] 정합 중: {i}/{len(pcds)-1}")
         # 현재 클라우드를 target에 맞게 정합할 변환 계산
         T = pairwise_registration(pcds[i], target, voxel_size)
         # 변환 적용
@@ -77,6 +77,6 @@ def multi_registration(pcd_files, voxel_size=0.005, save_path=None):
     # 결과 저장
     if save_path is not None:
         o3d.io.write_point_cloud(save_path, target)
-        print(f"[merge] 병합 및 변환 결과 저장 완료: {save_path}")
+        # print(f"[merge] 병합 및 변환 결과 저장 완료: {save_path}")
 
     return target

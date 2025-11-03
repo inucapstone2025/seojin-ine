@@ -33,7 +33,7 @@ def remove_background_color_from_file(pcd_path, green_threshold=30):
     result.points = o3d.utility.Vector3dVector(filtered_points)
     result.colors = o3d.utility.Vector3dVector(filtered_colors)
 
-    print(f"[noise_removal] 필터링 전: {len(colors)}, 필터링 후: {len(filtered_colors)}")
+    # print(f"[noise_removal] 필터링 전: {len(colors)}, 필터링 후: {len(filtered_colors)}")
     return result
 
 def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_k=2):
@@ -118,8 +118,8 @@ def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_
             top_label = f"top{i+1}"
             save_path = os.path.join(aligned_dir, f"{top_label}_{side_label}.ply")
             o3d.io.write_point_cloud(save_path, cluster_pcd)
-            print(f"[dbscan] 필터링 결과 저장 완료: {save_path}")
+            # print(f"[dbscan] 필터링 결과 저장 완료: {save_path}")
         
-        print(f"[dbscan] {top_label} ({side_label}, Original ID {data['original_id']}): Points {len(cluster_pcd.points)}, Median X {data['median_x']:.4f}")
+        # print(f"[dbscan] {top_label} ({side_label}, Original ID {data['original_id']}): Points {len(cluster_pcd.points)}, Median X {data['median_x']:.4f}")
 
     return cluster_pcd_list

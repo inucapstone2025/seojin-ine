@@ -29,7 +29,7 @@ def poisson_mesh_from_clusters(cluster_pcd_list, mesh_dir=None):
         if mesh_dir is not None:
             save_path = os.path.join(mesh_dir, f"mesh_{side_label}_poisson.ply")
             o3d.io.write_triangle_mesh(save_path, mesh)
-            print(f"[mesh] {side_label} 메쉬 저장 완료: {save_path}")
+            # print(f"[mesh] {side_label} 메쉬 저장 완료: {save_path}")
 
         # 시각화
         # o3d.visualization.draw_geometries([mesh], window_name=f"{side_label.capitalize()} Mesh")

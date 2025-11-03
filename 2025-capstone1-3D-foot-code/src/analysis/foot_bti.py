@@ -47,7 +47,7 @@ def classify_width(pcd: o3d.geometry.PointCloud, aabb: o3d.geometry.AxisAlignedB
     width  = np.max(points_in_box[:,0]) - np.min(points_in_box[:,0])
     ratio = length / width if width > 0 else 0
 
-    print(f"🔍 발 길이/너비 비율: {ratio:.2f}")
+    # print(f"🔍 발 길이/너비 비율: {ratio:.2f}")
     return "W" if ratio <= 2.6 else "N"
 
 
