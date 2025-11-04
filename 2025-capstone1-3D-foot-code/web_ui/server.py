@@ -5,8 +5,14 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from src.capture.pi_capture import capture_from_raspberry_pi_with_esp32
+import uvicorn
+import time
 
 captured_session_dir = None 
+
+#추가 전역 변수,
+_server_started = False #서버 스레드가 이미 사작되었는지 확인하는 플래그 
+_app_instance = None # FastAPI 앱 인스턴스를 저장할 변수 
 
 def create_app(config): # FastAPI 앱 생성 함수 
     app = FastAPI(title="RPi Capture Web UI")
@@ -15,6 +21,9 @@ def create_app(config): # FastAPI 앱 생성 함수
     @app.post("/start-capture") # /start-capture 라우트를 등록
     async def start_capture(req: Request):
         global captured_session_dir
+
+        if captured_session_dir is not None:
+            return JSONResponse({"ok": False, "error": "이전 사용자의 분석이 진행 중입니다. 잠시 후 시도하세요."}, status_code=409)
         data = await req.json()
         name = data.get("name", "anon")
         gender = data.get("gender", "U")
@@ -65,23 +74,36 @@ def launch_web_ui(config):
     import time
     import threading
 
-    global captured_session_dir  # ← 함수 최상단에서 한 번만 선언
+    global captured_session_dir, _server_started, _app_instance  # ← 함수 최상단에서 한 번만 선언
+    captured_session_dir = None #세션 상태 초기화, 새 사용자를 받기 위해 None으로 리셋해야 한다. 1103
 
-    app = create_app(config)
+    if not _server_started:
+        print("[Web] 서버를 시작합니다.")
+        _app_instance = create_app(config)
 
-    # 웹 서버를 별도 스레드로 실행
-    server_thread = threading.Thread(
-        target=lambda: uvicorn.run(app, host="0.0.0.0", port=9000),
-        daemon=True
-    )
-    server_thread.start()
-
-    webbrowser.open("http://127.0.0.1:9000/")
-    # input("촬영 완료 후 엔터를 눌러 종료합니다...")
-
+         # 웹 서버를 별도 스레드로 실행
+        server_thread = threading.Thread(
+            target=lambda: uvicorn.run(_app_instance, host="0.0.0.0", port=9000),
+            daemon=True
+        )
+        server_thread.start()
+        
+        webbrowser.open("http://127.0.0.1:9000/")
+        # input("촬영 완료 후 엔터를 눌러 종료합니다...")
+        _server_started = True #서버가 시작됨을 알림 
+    else: 
+        print("다음 사용자 대기중")
+    
     # captured_session_dir가 설정될 때까지 대기
+    # 위에서 None으로 리셋했기 때문에 새 캡처가 완료될 때까지 정상적으로 대기함)
     while captured_session_dir is None:
         time.sleep(0.5)
 
     # 촬영 완료 후 session_dir 반환
     return captured_session_dir
+
+
+   
+
+   
+

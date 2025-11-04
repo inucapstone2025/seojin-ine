@@ -16,22 +16,39 @@ def remove_background_color_from_file(pcd_path, green_threshold=30):
 
     # 포인트 클라우드 파일 불러오기
     pcd = o3d.io.read_point_cloud(pcd_path)
+    # o3d.visualization.draw_geometries([pcd], window_name="Before Background Removal")
 
     # 컬러 정보 추출 (0~1) → 0~255로 정규화
+    points = np.asarray(pcd.points)
     colors = np.asarray(pcd.colors)
+    mask = np.ones(len(points), dtype=bool)
     rgb_255 = (colors * 255).astype(np.uint8)
 
-    # G값이 threshold보다 큰 포인트는 배경으로 간주하여 제거
-    mask = ~(rgb_255[:, 1] > green_threshold)
+    # # G값이 threshold보다 큰 포인트는 배경으로 간주하여 제거
+    # mask = ~(rgb_255[:, 1] > green_threshold)
+    # R,G,B 모두 black_threshold 이하인 포인트만 선택
+    black_threshold=30
+    mask = np.all(rgb_255 <= black_threshold, axis=1)
 
-    # 배경이 아닌 포인트만 선택
-    filtered_points = np.asarray(pcd.points)[mask]
+    # Y값 범위 필터링
+    y_min = -0.04 # -0.045
+    y_max = 0.045
+    if y_min is not None:
+        mask = mask & (points[:, 1] >= y_min)
+    if y_max is not None:
+        mask = mask & (points[:, 1] <= y_max)
+
+    # 필터링 적용
+    filtered_points = points[mask]
     filtered_colors = colors[mask]
 
     # 새로운 포인트 클라우드 객체로 생성
     result = o3d.geometry.PointCloud()
     result.points = o3d.utility.Vector3dVector(filtered_points)
     result.colors = o3d.utility.Vector3dVector(filtered_colors)
+
+    # 시각화 추가
+    # o3d.visualization.draw_geometries([result], window_name="Filtered Point Cloud")
 
     # print(f"[noise_removal] 필터링 전: {len(colors)}, 필터링 후: {len(filtered_colors)}")
     return result

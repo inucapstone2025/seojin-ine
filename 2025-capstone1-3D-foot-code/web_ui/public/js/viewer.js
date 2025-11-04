@@ -10,8 +10,8 @@ import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
   const btn360      = document.getElementById('btn360');    // 360° 스캔
   const statusEl    = document.getElementById('status') || { textContent: '' };
   const metaEl      = document.getElementById('meta')   || { innerHTML: '' };
-  const nameInput   = document.getElementById('name')   || { value: 'anon' };
-  const genderInput = document.getElementById('gender') || { value: 'U' };
+  const nameInput   = document.getElementById('name');
+  const genderInput = document.getElementById('gender');
   const mount       = document.getElementById('viewer') || document.getElementById('three-canvas') || document.body;
 
   // ---------- Three.js core ----------
@@ -86,6 +86,8 @@ import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
       }
     });
     scene.remove(obj);
+
+    currentObject = null; 
   }
 
   // 안정적인 프레이밍 (bounding box 기반)
@@ -164,8 +166,9 @@ import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
 
   // ---------- API calls ----------
     async function apiStartCapture() {
-        const name = nameInput.value || 'anon';
-        const gender = genderInput.value || 'U';
+        // input이 null일 수 있으므로 안전하게 값을 가져오기       
+        const name = (nameInput ? nameInput.value : 'anon') || 'anon';
+        const gender = (genderInput ? genderInput.value : 'U') || 'U';
         btnSingle && (btnSingle.disabled = true);
         setStatus('단일 촬영 요청 중… (Pi 캡처)');
 
@@ -176,14 +179,21 @@ import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
                 body: JSON.stringify({ name, gender })
             });
 
+            const data = await resp.json();
+
             if (!resp.ok) {
-                const text = await resp.text();
-                throw new Error(text);
+                // const text = await resp.text();
+                throw new Error(data.error || '촬영 요청 실패 (HTTP ' + resp.status + ')');
             }
 
-            setStatus('촬영 요청 전송 완료');
+            // (수정) 서버가 보낸 성공 메시지(data.message)를 상태에 표시 1103
+            setStatus(data.message || '촬영 완료. QR 코드를 확인하세요.');
             // 여기서 PLY 로드 관련 코드는 제거
             // await loadPLY(data.modelUrl);
+
+            if(nameInput) nameInput.value = ''; // 이름 필드 지우기 1103
+            if(genderInput) genderInput.value ='U'; // 성별 필드 기본값으로 1103
+            disposeObject(currentObject); //3D 뷰어에 표시된 객체(있다면) 제거 1103
         } catch (e) {
             console.error(e);
             setStatus('에러: ' + e.message);
