@@ -2,6 +2,42 @@ import open3d as o3d
 import numpy as np
 import os
 
+import open3d as o3d
+import numpy as np
+
+def remove_ground_ransac(pcd, distance_threshold=0.005, num_iterations=1000, visualize=False):
+    points = np.asarray(pcd.points)
+    y_min = np.min(points[:, 1])
+    
+    # 바닥 후보 인덱스
+    ground_candidate_indices = np.where(points[:, 1] < y_min + 0.02)[0]
+    ground_candidates = pcd.select_by_index(ground_candidate_indices)
+
+    # RANSAC 평면 추정
+    plane_model, inliers = ground_candidates.segment_plane(
+        distance_threshold=distance_threshold,
+        ransac_n=3,
+        num_iterations=num_iterations
+    )
+
+    # inliers를 원본 인덱스로 변환
+    original_inlier_indices = ground_candidate_indices[inliers]
+
+    # 바닥/비바닥 분리
+    mask = np.ones(len(points), dtype=bool)
+    mask[original_inlier_indices] = False
+    no_ground = pcd.select_by_index(np.where(mask)[0])
+    ground = pcd.select_by_index(original_inlier_indices)
+
+    if visualize:
+        ground.paint_uniform_color([1, 0, 0])
+        no_ground.paint_uniform_color([0.7, 0.7, 0.7])
+        o3d.visualization.draw_geometries([ground, no_ground])
+
+    return no_ground, ground
+
+
+
 def remove_background_color_from_file(pcd_path, green_threshold=30):
     """
     포인트 클라우드 파일에서 녹색 배경을 제거하는 함수
@@ -31,8 +67,8 @@ def remove_background_color_from_file(pcd_path, green_threshold=30):
     mask = np.all(rgb_255 <= black_threshold, axis=1)
 
     # Y값 범위 필터링
-    y_min = -0.04 # -0.045
-    y_max = 0.045
+    y_min = -0.06 # -0.045
+    y_max = 0.05
     if y_min is not None:
         mask = mask & (points[:, 1] >= y_min)
     if y_max is not None:
@@ -47,10 +83,19 @@ def remove_background_color_from_file(pcd_path, green_threshold=30):
     result.points = o3d.utility.Vector3dVector(filtered_points)
     result.colors = o3d.utility.Vector3dVector(filtered_colors)
 
+    # print(f"[noise_removal] 필터링 전: {len(colors)}, 필터링 후: {len(filtered_colors)}")
+
+    # ======================
+    # RANSAC 기반 바닥 제거 추가
+    # ======================
+    # print("[noise_removal] RANSAC을 통한 바닥면 제거 중...")
+    # result_no_ground, ground = remove_ground_ransac(result, 
+    #                                                 distance_threshold=0.005, 
+    #                                                 num_iterations=1000,
+    #                                                 visualize=True)
+    # result = result_no_ground
     # 시각화 추가
     # o3d.visualization.draw_geometries([result], window_name="Filtered Point Cloud")
-
-    # print(f"[noise_removal] 필터링 전: {len(colors)}, 필터링 후: {len(filtered_colors)}")
     return result
 
 def dbscan_largest_clusters(pcd, aligned_dir=None, eps=0.01, min_points=20, top_k=2):

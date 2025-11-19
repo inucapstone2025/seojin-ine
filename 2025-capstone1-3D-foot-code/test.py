@@ -51,7 +51,8 @@
 #     paths = config["paths"]
 #     degrees = config["camera"].get("degrees", None)
 
-#     for mode in ["raw", "filtered", "aligned", "final_aligned"]:
+#     # for mode in ["raw", "filtered", "aligned", "final_aligned"]:
+#     for mode in ["raw"]:
 #         print(f"=== {mode.replace('_',' ').capitalize()} Point Clouds ===")
 #         visualize_pointclouds(paths, degrees, mode=mode)
 
@@ -59,6 +60,7 @@
 import os
 import open3d as o3d
 from src.utils.config_loader import load_config
+import numpy as np
 
 def visualize_merged_aligned(paths, degrees=None):
     """
@@ -91,6 +93,20 @@ def visualize_merged_aligned(paths, degrees=None):
     
     print("[INFO] 모든 aligned PLY 파일 합쳐서 시각화")
     o3d.visualization.draw_geometries([merged_pcd], window_name="Merged Aligned PointCloud")
+    
+    # ===== Voxel Downsample 및 Y축 리밋 적용 후 시각화 =====
+    # voxel_size = 0.006  # 원하는 크기로 조정
+    # merged_pcd_voxel = merged_pcd.voxel_down_sample(voxel_size) 
+    # o3d.visualization.draw_geometries([merged_pcd_voxel], window_name="Merged Aligned PointCloud (Voxel)")
+
+    # # Y축 리밋 적용 (예: y_min ~ y_max)
+    # y_min, y_max = -0.3, 0.048  # 원하는 범위로 조정
+    # points = np.asarray(merged_pcd_voxel.points)
+    # mask = (points[:, 1] >= y_min) & (points[:, 1] <= y_max)  # Y축 필터
+    # merged_pcd_voxel.points = o3d.utility.Vector3dVector(points[mask])
+
+    # print(f"[INFO] Y축 {y_min} ~ {y_max} 범위로 제한 후 시각화")
+    # o3d.visualization.draw_geometries([merged_pcd_voxel], window_name="Merged Aligned PointCloud (Voxel, Y-limited)")
 
 if __name__ == "__main__":
     config = load_config()

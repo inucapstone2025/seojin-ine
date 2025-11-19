@@ -65,7 +65,8 @@ def process_session(paths, config):
     left_pcd = visuals[0]
     left_aabb = visuals[1]
 
-    bti_results = analyze_foot_bti(left_pcd, left_aabb, measurements)
+    bti_results, footprint = analyze_foot_bti(left_pcd, left_aabb, measurements)
+    # print("Estimated length (mm):", footprint.length_est_mm)
     print("\n===== 발BTI 분석 결과 =====")
     for key, value in bti_results.items():
         print(f"{key}: {value}")

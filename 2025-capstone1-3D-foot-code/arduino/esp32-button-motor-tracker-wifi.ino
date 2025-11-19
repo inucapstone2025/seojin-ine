@@ -2,8 +2,8 @@
 #include <WiFiClient.h>
 
 // wifi 
-const char* ssid = "wifi-ssid"; // ** 설정 필요 **
-const char* password = "wifi-password"; // ** 설정 필요 **
+const char* ssid = "wifi-ssid";
+const char* password = "wifi-password";
 WiFiServer tcpServer(5000);
 WiFiClient tcpClient;
 
@@ -129,21 +129,20 @@ void loop(){
   
 }
 
-void tcpServer_hasClient(){
-    // 클라이언트 접속 확인
+void tcpServer_hasClient() {
+  // 새 클라이언트 연결이 있는지 확인
   if (tcpServer.hasClient()) {
-    if (!tcpClient || !tcpClient.connected()) {
-      tcpClient = tcpServer.available(); // 새 클라이언트 수락
-      Serial.println("accept new Connection ...");
-    } else {
-      WiFiClient temp = tcpServer.available();
-      temp.stop(); // 이미 클라이언트가 있으면 새 연결 거부
-      Serial.println("reject new Connection ...");
+    WiFiClient newClient = tcpServer.available();
+
+    // 기존 클라이언트가 연결 중이면 끊기
+    if (tcpClient && tcpClient.connected()) {
+      tcpClient.stop();
+      Serial.println("Force closed previous client.");
     }
-  }
-  if (!tcpClient || !tcpClient.connected()) {
-    delay(100);
-    return;
+
+    // 새 클라이언트로 교체
+    tcpClient = newClient;
+    Serial.println("Accepted new client connection.");
   }
 }
 

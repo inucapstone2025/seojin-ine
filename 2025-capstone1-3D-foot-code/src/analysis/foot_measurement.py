@@ -39,7 +39,7 @@ def yaw_only_rotation_matrix(vec):
     return R_yaw
 
 
-def measure_foot(ply_path):
+def measure_foot(ply_path, idx):
     """단일 발 PLY 파일 처리 및 치수 계산 + 길이/너비/높이 선 생성"""
     pcd = o3d.io.read_point_cloud(ply_path)
     points = np.asarray(pcd.points)
@@ -99,13 +99,19 @@ def measure_foot(ply_path):
     heel_to_MTP_joint_mm = heel_to_MTP_joint * 1000
     # print(f"🔍 뒤꿈치에서 중족지관절까지 거리: {heel_to_MTP_joint_mm:.2f} mm")
 
-    length_mm = extent[2]
+    if idx == 1:
+        foot = "왼발"
+        length_mm = extent[2]
+    else:
+        foot = "오른발"
+        length_mm = extent[2]
     width_mm = extent[0]
 
-    print(f"\n[발 측정 결과: {os.path.basename(ply_path)}]")
-    print(f"  발 길이   : {length_mm:.2f} mm")
-    print(f"  발 너비   : {width_mm:.2f} mm")
-    print(f"  발등 높이 : {height_mm:.2f} mm")
+    # print(f"\n[발 측정 결과: {os.path.basename(ply_path)}]")
+    # print(f"\n[발 측정 결과: {foot}]")
+    # print(f"  발 길이   : {length_mm:.2f} mm")
+    # print(f"  발 너비   : {width_mm:.2f} mm")
+    # print(f"  발등 높이 : {height_mm:.2f} mm")
 
     # === (6) 길이/너비/높이 선(LineSet) 생성 ===
     lines = []
@@ -166,7 +172,7 @@ def measure_both_feet(mesh_dir, gap=0.2):
     for idx, file in enumerate(foot_files):
         ply_path = os.path.join(mesh_dir, file)
 
-        rotated_pcd, aabb, extent, line_set, length_mm, width_mm, height_mm, heel_to_MTP_joint_mm = measure_foot(ply_path)
+        rotated_pcd, aabb, extent, line_set, length_mm, width_mm, height_mm, heel_to_MTP_joint_mm = measure_foot(ply_path, idx)
         rotated_pcd.paint_uniform_color([0.7, 0.7, 0.7])
 
         # === 발 위치 보정 ===

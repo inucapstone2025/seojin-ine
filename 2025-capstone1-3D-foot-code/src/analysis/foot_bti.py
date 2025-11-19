@@ -113,4 +113,16 @@ def analyze_foot_bti(left_pcd: o3d.geometry.PointCloud,
         "instep": classify_instep(left_pcd, left_aabb, measurements),
         "arch": classify_arch(left_pcd, left_aabb, measurements),
     }
-    return result
+
+    # print(f"\n[발 측정 결과: {'왼발'}]")
+    # print(f"  발 길이   : {measurements[1]['length_mm']:.2f} mm")
+    # print(f"  발 너비   : {measurements[1]['width_mm']:.2f} mm")
+    # print(f"  발등 높이 : {measurements[1]['height_mm']:.2f} mm")
+
+    # print(f"\n[발 측정 결과: {'오른발'}]")
+    print(f"\n[발 측정 결과]")
+    print(f"  발 길이   : {measurements[0]['length_mm']:.2f} mm")
+    print(f"  발 너비   : {measurements[0]['width_mm']:.2f} mm")
+    print(f"  발등 높이 : {measurements[0]['height_mm']:.2f} mm")
+
+    return result, footprint
